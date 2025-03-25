@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotspot Locator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+            color: #fff;
+            overflow-x: hidden;
+            transition: background-color 0.5s ease-in-out;
+            background-color: #000; /* Set a default background color */
+            background-image: url('https://www.transparenttextures.com/patterns/asfalt-dark.png'); /* Background pattern */
+        }
+
+        body.light-mode {
+            background-color: #fff;
+            color: #333;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
+            z-index: 1; /* Ensure it sits above the background */
+        }
+
+        .container {
+            background: rgba(0, 0, 0, 0.8); /* Darker background for better contrast */
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.8);
+            display: inline-block;
+            margin-top: 100px;
+            transition: transform 0.3s;
+            position: relative; /* For loading animation */
+            z-index: 2; /* Ensure it sits above the overlay */
+        }
+
+        body.light-mode .container {
+            background: rgba(255, 255, 255, 0.9); /* Lighter background in light mode */
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+        }
+
+        h1 {
+            color: #ff473d;
+            font-size: 3em;
+            margin-bottom: 10px;
+            transition: color 0.3s;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            color: #ccc;
+        }
+
+        body.light-mode h2 {
+            color: #444;
+        }
+
+        p {
+            font-size: 1.2em;
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+
+        .btn {
+            display: block;
+            width: 230px;
+            padding: 15px;
+            margin: 15px auto;
+            border: none;
+            background-color: #ff473d;
+            color: white;
+            font-size: 18px;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s, transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #e63940;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .footer {
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #bbb;
+        }
+
+        .toggle-mode {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border: none;
+            background: #ff473d;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+            z-index: 2; /* Ensure it sits above the overlay */
+        }
+
+        .toggle-mode:hover {
+            background: #e63940;
+            transform: scale(1.05);
+        }
+
+        .image-row {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .image-row img {
+            border-radius: 12px;
+            width: 300px;
+            height: 200px;
+            object-fit: cover;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .image-row img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.7);
+        }
+
+        .about-section {
+            margin: 60px auto;
+            padding: 40px 20px;
+            max-width: 900px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+
+        body.light-mode .about-section {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+
+        .about-section h2 {
+            font-size: 2em;
+            color: #ff473d;
+            margin-bottom: 20px;
+        }
+
+        .about-section p {
+            font-size: 1.1em;
+            color: #ddd;
+            line-height: 1.7;
+        }
+
+        body.light-mode .about-section p {
+            color: #333;
+        }
+
+        /* Weather Widget Styles */
+        .weather-widget {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px auto;
+            width: 200px;
+            color: #fff;
+            text-align: left;
+        }
+
+        .weather-widget h3 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        .weather-widget p {
+            margin: 5px 0;
+        }
+
+        /* Clock Widget Styles */
+        .clock-widget {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px auto;
+            width: 200px;
+            color: #fff;
+            text-align: left;
+        }
+
+        .clock-widget h3 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+
+        .clock-widget p {
+            margin: 5px 0;
+        }
+
+        /* Interactive Map Styles */
+        .map-container {
+            margin: 40px auto;
+            width: 80%;
+            height: 400px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+
+        .loading img {
+            width: 100px; /* Adjust size as needed */
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                width: 90%;
+            }
+            .image-row img {
+                width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div> <!-- Overlay added here -->
+    <div class="loading" id="loading">
+        <img src="https://i.imgur.com/llF5y4g.gif" alt="Loading..." aria-live="polite">
+    </div>
+
+    <button class="toggle-mode" onclick="toggleMode()">Toggle Mode</button>
+
+    <div class="container" role="main">
+        <h1>RoamIQ</h1>
+        <h2>Closest Hotspot Coordinates</h2>
+        <p>Latitude: <span id="latitude">{{ latitude }}</span></p>
+        <p>Longitude: <span id="longitude">{{ longitude }}</span></p>
+        <button class="btn" onclick="simulateNavigation(this, explore)">Explore Your Surroundings</button>
+        <a href="/touristspots" class="btn" onclick="simulateNavigation(this)">Find Attractions</a>
+        <button class="btn" onclick="simulateNavigation(this, findRestaurants)">Find Restaurants</button>
+
+        <div class="image-row">
+            <img src="C:\Users\User\OneDrive - Amrita vishwa vidyapeetham\Desktop\ML\hackathon\surroundings.jpeg" alt="Surroundings">
+            <img src="C:\Users\User\OneDrive - Amrita vishwa vidyapeetham\Desktop\ML\hackathon\cityview.jpg" alt="City View">
+            <img src="C:\Users\User\OneDrive - Amrita vishwa vidyapeetham\Desktop\ML\hackathon\ssaffron-restaurant.jpg" alt="Restaurant">
+        </div>
+
+        <div class="weather-widget">
+            <h3>Weather</h3>
+            <p>Temperature: 25°C</p>
+            <p>Condition: Sunny</p>
+        </div>
+
+        <div class="clock-widget">
+            <h3>Current Time</h3>
+            <p id="clock"></p>
+        </div>
+
+        <div class="map-container">
+            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3151.835434509198!2d144.9537353153163!3d-37.81627997975157!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x6ad642af0f11f3b3%3A0x5045675218ceed0!2sFederation%20Square!5e0!3m2!1sen!2sau!4v1616161616161!5m2!1sen!2sau" 
+                width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+        </div>
+    </div>
+
+    <div class="about-section">
+        <h2>About Us</h2>
+        <p>RoamIQ is a cutting-edge travel and exploration service by WanderWorks Inc., dedicated to transforming the way you experience the world. Our mission is to bring undiscovered gems closer to curious minds. Whether you're planning your next vacation or spontaneously exploring a new city, our intelligent hotspot detection, cultural mapping, and real-time recommendations are here to guide you. With a deep love for history, culture, and food, our expert travel curators and tech wizards come together to craft unforgettable journeys. Start your adventure with us today — where curiosity meets convenience!</p>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2023 Hotspot Locator. Your gateway to cultural heritage exploration.</p>
+    </div>
+
+    <script>
+        function explore() {
+            alert("Exploring your surroundings...");
+        }
+
+        function findRestaurants() {
+            alert("Finding nearby restaurants...");
+        }
+
+        function toggleMode() {
+            document.body.classList.toggle("light-mode");
+        }
+
+        function simulateNavigation(element, callback) {
+            element.style.transform = "scale(0.95)";
+            setTimeout(() => {
+                element.style.transform = "scale(1)";
+                if (callback) callback();
+            }, 150);
+        }
+
+        // Clock Functionality
+        function updateClock() {
+            const now = new Date();
+            const options = { hour: '2-digit', minute: '2-digit', second: '2-digit' };
+            document.getElementById('clock').textContent = now.toLocaleTimeString([], options);
+        }
+
+        setInterval(updateClock, 1000);
+        updateClock(); // Initial call to display the clock immediately
+
+        // Show loading animation on page load
+        window.onload = function() {
+            document.getElementById('loading').style.display = 'none'; // Hide loading animation
+        };
+    </script>
+</body>
+</html>
